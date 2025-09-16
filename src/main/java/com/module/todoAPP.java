@@ -1,6 +1,6 @@
-package com.model;
+package com.module;
 import java.time.LocalDateTime;
-public class todoAPP{
+public class todoapp {
 
     private int id;
     private String title;
@@ -10,18 +10,18 @@ public class todoAPP{
     private LocalDateTime updated_at;
 
 
-    public todoAPP(){
+    public todoapp(){
         this.created_at=LocalDateTime.now();
         this.updated_at=LocalDateTime.now();
     }
 
-    public todoAPP(String title,String description){
+    public todoapp(String title, String description){
         this();
         this.title=title;
         this.description=description;
     }
 
-    public todoAPP(int id,String title,String description,boolean completed,LocalDateTime created_at,LocalDateTime updated_at){
+    public todoapp(int id, String title, String description, boolean completed, LocalDateTime created_at, LocalDateTime updated_at){
         this.id = id;
         this.title = title;
         this.description = description;
