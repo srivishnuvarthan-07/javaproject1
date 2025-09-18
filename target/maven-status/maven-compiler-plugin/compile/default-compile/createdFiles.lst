@@ -1,5 +1,6 @@
 com\gui\todogui.class
 com\todo\Main.class
 com\dao\tododao.class
+com\Util\Database.class
 com\gui\todogui$1.class
 com\model\todoapp.class

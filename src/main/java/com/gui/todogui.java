@@ -3,8 +3,10 @@ package com.gui;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.sql.SQLException;
 import java.util.List;
 import com.dao.tododao;
+import com.model.todoapp;
 
 public class todogui extends JFrame {
 
@@ -24,6 +26,8 @@ public class todogui extends JFrame {
         tdao = new tododao();   // create DAO
         initializecomponent();
         setuplayout();
+        setupListeners();
+        loadtodo();
     }
 
     private void initializecomponent() {
@@ -60,46 +64,163 @@ public class todogui extends JFrame {
         // Filter combo
         String[] fileoption = {"All", "Completed", "Pending"};
         comboBox = new JComboBox<>(fileoption);
-
-        // Example action listener
-        addbutton.addActionListener(e -> JOptionPane.showMessageDialog(this, "Add button clicked!"));
     }
 
     private void setuplayout() {
         setLayout(new BorderLayout());
 
-        // Table in scroll pane
-//        JScrollPane scrollPane = new JScrollPane(todotable);
-//        add(scrollPane, BorderLayout.CENTER);
-
-        // Input panel (bottom)
+        // Input panel
         JPanel inputPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.gridx = 0;
         gbc.gridy = 0;
-        //gbc.anchor = GridBagConstraints.WEST;
 
         inputPanel.add(new JLabel("Title:"), gbc);
         gbc.gridx = 1;
         inputPanel.add(textField, gbc);
-        add(inputPanel, BorderLayout.NORTH);
 
         gbc.gridx = 0;
         gbc.gridy = 1;
         inputPanel.add(new JLabel("Description:"), gbc);
         gbc.gridx = 1;
-        inputPanel.add(descriptionArea, gbc);
+        inputPanel.add(new JScrollPane(descriptionArea), gbc);
 
         gbc.gridx = 1;
-        gbc.gridy = 1;
-        add(inputPanel, BorderLayout.NORTH);
+        gbc.gridy = 2;
+        inputPanel.add(checkBox, gbc);
 
+        // Buttons
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        buttonPanel.add(addbutton);
+        buttonPanel.add(updatebutton);
+        buttonPanel.add(deletebutton);
+        buttonPanel.add(refreasebutton);
 
+        // Filter
+        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        filterPanel.add(new JLabel("FILTER"));
+        filterPanel.add(comboBox);
+
+        JPanel northPanel = new JPanel(new BorderLayout());
+        northPanel.add(inputPanel, BorderLayout.CENTER);
+        northPanel.add(buttonPanel, BorderLayout.SOUTH);
+        northPanel.add(filterPanel, BorderLayout.NORTH);
+
+        add(northPanel, BorderLayout.NORTH);
+        add(new JScrollPane(todotable), BorderLayout.CENTER);
     }
+
+    private void setupListeners() {
+        addbutton.addActionListener(e -> addtodo());
+        updatebutton.addActionListener(e -> updatetodo());
+        deletebutton.addActionListener(e -> deletetodo());
+        refreasebutton.addActionListener(e -> refreasetodo());
+    }
+
+    private void addtodo() {
+        try {
+            String title = textField.getText().trim();
+            String desc = descriptionArea.getText().trim();
+            boolean completed = checkBox.isSelected();
+
+            if (title.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Title cannot be empty!");
+                return;
+            }
+
+            todoapp t = new todoapp();
+            t.setTitle(title);
+            t.setDescription(desc);
+            t.setCompleted(completed);
+
+            tdao.insertTodo(t);
+            loadtodo();
+            clearInputs();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error adding todo: " + ex.getMessage());
+        }
+    }
+
+    private void updatetodo() {
+        int row = todotable.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "Select a row to update!");
+            return;
+        }
+
+        try {
+            int id = (int) tablemodel.getValueAt(row, 0);
+            String title = textField.getText().trim();
+            String desc = descriptionArea.getText().trim();
+            boolean completed = checkBox.isSelected();
+
+            todoapp t = new todoapp();
+            t.setId(id);
+            t.setTitle(title);
+            t.setDescription(desc);
+            t.setCompleted(completed);
+
+            tdao.updateTodo(t);
+            loadtodo();
+            clearInputs();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error updating todo: " + ex.getMessage());
+        }
+    }
+
+    private void deletetodo() {
+        int row = todotable.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "Select a row to delete!");
+            return;
+        }
+
+        try {
+            int id = (int) tablemodel.getValueAt(row, 0);
+            tdao.deleteTodo(id);
+            loadtodo();
+            clearInputs();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error deleting todo: " + ex.getMessage());
+        }
+    }
+
+    private void refreasetodo() {
+        loadtodo();
+    }
+
+    private void loadtodo() {
+        try {
+            List<todoapp> todos = tdao.getAllTodos();
+            updateTable(todos);
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error loading todos: " + e.getMessage());
+        }
+    }
+
+    private void updateTable(List<todoapp> todos) {
+        tablemodel.setRowCount(0);
+        for (todoapp t : todos) {
+            Object[] obj = {
+                    t.getId(),
+                    t.getTitle(),
+                    t.getDescription(),
+                    t.isCompleted(),
+                    t.getCreated_at(),
+                    t.getUpdated_at()
+            };
+            tablemodel.addRow(obj);
+        }
+    }
+
+    private void clearInputs() {
+        textField.setText("");
+        descriptionArea.setText("");
+        checkBox.setSelected(false);
+    }
+
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new todogui().setVisible(true);
-        });
+        SwingUtilities.invokeLater(() -> new todogui().setVisible(true));
     }
 }
