@@ -128,26 +128,34 @@ public class todogui extends JFrame {
     }
 
     private void addtodo() {
-        try {
-            String title = textField.getText().trim();
-            String desc = descriptionArea.getText().trim();
-            boolean completed = checkBox.isSelected();
+        int row =todotable.getSelectedRow();
+        if(row==-1) {
+            try {
+                String title = textField.getText().trim();
+                String desc = descriptionArea.getText().trim();
+                boolean completed = checkBox.isSelected();
 
-            if (title.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Please enter the title");
-                return;
+                if (title.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Please enter the title");
+                    return;
+                }
+
+                todoapp t = new todoapp();
+                t.setTitle(title);
+                t.setDescription(desc);
+                t.setCompleted(completed);
+
+                if (tdao.insertTodo(t)) {
+                    JOptionPane.showMessageDialog(this, "Row added succsesfully");
+                }
+                loadtodo();
+                clearInputs();
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this, "Error adding todo: " + ex.getMessage());
             }
-
-            todoapp t = new todoapp();
-            t.setTitle(title);
-            t.setDescription(desc);
-            t.setCompleted(completed);
-
-            tdao.insertTodo(t);
-            loadtodo();
-            clearInputs();
-        } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Error adding todo: " + ex.getMessage());
+        }
+        else{
+            JOptionPane.showMessageDialog(this, "Row already exists","Warning",JOptionPane.WARNING_MESSAGE);
         }
     }
 
@@ -174,7 +182,9 @@ public class todogui extends JFrame {
             t.setDescription(desc);
             t.setCompleted(completed);
 
-            tdao.updateTodo(t);
+            if(tdao.updateTodo(t)){
+                JOptionPane.showMessageDialog(this,"Row updated succsesfully");
+            }
             loadtodo();
             clearInputs();
         } catch (SQLException ex) {
@@ -189,8 +199,8 @@ public class todogui extends JFrame {
             return;
         }
 
-        try {
-            int id = (int) tablemodel.getValueAt(row, 0);
+        try  {
+            int id = (int) todotable.getValueAt(row, 0);
             tdao.deleteTodo(id);
             loadtodo();
             clearInputs();
@@ -199,7 +209,7 @@ public class todogui extends JFrame {
         }
     }
 
-    private void refreasetodo() {
+    private void refreasetodo(){
         loadtodo();
     }
 

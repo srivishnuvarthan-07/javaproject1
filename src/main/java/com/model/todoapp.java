@@ -11,13 +11,13 @@ public class todoapp {
     private LocalDateTime created_at;
     private LocalDateTime updated_at;
 
-    // Default constructor
+
     public todoapp() {
         this.created_at = LocalDateTime.now();
         this.updated_at = LocalDateTime.now();
     }
 
-    // Constructor with title/description
+
     public todoapp(String title, String description) {
         this();
         this.title = title;
@@ -25,7 +25,7 @@ public class todoapp {
         this.completed = false;
     }
 
-    // Full constructor
+
     public todoapp(int id, String title, String description, boolean completed,
                    LocalDateTime created_at, LocalDateTime updated_at) {
         this.id = id;
@@ -36,7 +36,7 @@ public class todoapp {
         this.updated_at = updated_at;
     }
 
-    // Getters & Setters
+
     public int getId() {
         return id;
     }

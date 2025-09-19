@@ -9,7 +9,7 @@ import java.util.List;
 
 public class tododao {
 
-    // Fetch all todos
+
     public List<todoapp> getAllTodos() throws SQLException {
         List<todoapp> todoapps = new ArrayList<>();
         String sql = "SELECT * FROM todoapp ORDER BY created_at";
@@ -25,8 +25,8 @@ public class tododao {
         return todoapps;
     }
 
-    // Insert a new todo
-    public void insertTodo(todoapp t) throws SQLException {
+
+    public boolean insertTodo(todoapp t) throws SQLException {
         String sql = "INSERT INTO todoapp (title, description, completed) VALUES (?, ?, ?)";
         try (Connection con = Database.getConnection();
              PreparedStatement stmt = con.prepareStatement(sql)) {
@@ -34,12 +34,12 @@ public class tododao {
             stmt.setString(1, t.getTitle());
             stmt.setString(2, t.getDescription());
             stmt.setBoolean(3, t.isCompleted());
-            stmt.executeUpdate();
+            int rowscount=stmt.executeUpdate();
+            return (rowscount == 1);
         }
     }
 
-    // Update an existing todo
-    public void updateTodo(todoapp t) throws SQLException {
+    public boolean updateTodo(todoapp t) throws SQLException {
         String sql = "UPDATE todoapp SET title = ?, description = ?, completed = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
         try (Connection con = Database.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -48,11 +48,11 @@ public class tododao {
             ps.setString(2, t.getDescription());
             ps.setBoolean(3, t.isCompleted());
             ps.setInt(4, t.getId());
-            ps.executeUpdate();
+            int updaterow=ps.executeUpdate();
+            return (updaterow == 1);
         }
     }
 
-    // Delete a todo by ID
     public boolean deleteTodo(int id) throws SQLException {
         String sql = "DELETE FROM todoapp WHERE id = ?";
         try (Connection con = Database.getConnection();
@@ -64,17 +64,15 @@ public class tododao {
         }
     }
 
-    // ✅ Fetch only completed todos
     public List<todoapp> getCompletedTodos() throws SQLException {
         return getTodosByStatus(true);
     }
 
-    // ✅ Fetch only pending todos
     public List<todoapp> getPendingTodos() throws SQLException {
         return getTodosByStatus(false);
     }
 
-    // Helper method to avoid duplicate code
+
     private List<todoapp> getTodosByStatus(boolean completed) throws SQLException {
         List<todoapp> todoapps = new ArrayList<>();
         String sql = "SELECT * FROM todoapp WHERE completed = ? ORDER BY created_at";
@@ -93,7 +91,6 @@ public class tododao {
         return todoapps;
     }
 
-    // ✅ Small helper to map a ResultSet row into todoapp object
     private todoapp mapRow(ResultSet rs) throws SQLException {
         todoapp t = new todoapp();
         t.setId(rs.getInt("id"));
