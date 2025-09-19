@@ -38,6 +38,9 @@
     &quot;accountId&quot;: &quot;81490a45-5e8b-4494-90f9-83b1e421042a&quot;
   }
 }</component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/src/main/java/com/dao/tododao.java" root0="FORCE_HIGHLIGHTING" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 0
 }</component>
@@ -49,6 +52,7 @@
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
     &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
     &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
@@ -107,7 +111,9 @@
       <workItem from="1757999713964" duration="3098000" />
       <workItem from="1758008382832" duration="4387000" />
       <workItem from="1758083460014" duration="15870000" />
-      <workItem from="1758183992839" duration="4746000" />
+      <workItem from="1758183992839" duration="7319000" />
+      <workItem from="1758255476489" duration="2556000" />
+      <workItem from="1758259650450" duration="5135000" />
     </task>
     <task id="LOCAL-00001" summary="hello">
       <option name="closed" value="true" />

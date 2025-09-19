@@ -5,6 +5,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.sql.SQLException;
 import java.util.List;
+
 import com.dao.tododao;
 import com.model.todoapp;
 
@@ -116,6 +117,14 @@ public class todogui extends JFrame {
         updatebutton.addActionListener(e -> updatetodo());
         deletebutton.addActionListener(e -> deletetodo());
         refreasebutton.addActionListener(e -> refreasetodo());
+
+        todotable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                fillFormFromTable();
+            }
+        });
+
+        comboBox.addActionListener(e -> filterTodos());
     }
 
     private void addtodo() {
@@ -125,7 +134,7 @@ public class todogui extends JFrame {
             boolean completed = checkBox.isSelected();
 
             if (title.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Title cannot be empty!");
+                JOptionPane.showMessageDialog(this, "Please enter the title");
                 return;
             }
 
@@ -142,16 +151,20 @@ public class todogui extends JFrame {
         }
     }
 
-    private void updatetodo() {
+    private void updatetodo(){
         int row = todotable.getSelectedRow();
         if (row == -1) {
-            JOptionPane.showMessageDialog(this, "Select a row to update!");
+            JOptionPane.showMessageDialog(this, "Please Select a row to update!","Validation",JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         try {
             int id = (int) tablemodel.getValueAt(row, 0);
             String title = textField.getText().trim();
+            if(title.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please enter the title For Todo","Validation error",JOptionPane.WARNING_MESSAGE);
+                return;
+            }
             String desc = descriptionArea.getText().trim();
             boolean completed = checkBox.isSelected();
 
@@ -211,6 +224,32 @@ public class todogui extends JFrame {
                     t.getUpdated_at()
             };
             tablemodel.addRow(obj);
+        }
+    }
+
+    private void fillFormFromTable() {
+        int row = todotable.getSelectedRow();
+        if (row != -1) {
+            textField.setText((String) tablemodel.getValueAt(row, 1));
+            descriptionArea.setText((String) tablemodel.getValueAt(row, 2));
+            checkBox.setSelected((boolean) tablemodel.getValueAt(row, 3));
+        }
+    }
+
+    private void filterTodos() {
+        String filter = (String) comboBox.getSelectedItem();
+        try {
+            List<todoapp> todos;
+            if ("Completed".equals(filter)) {
+                todos = tdao.getCompletedTodos();
+            } else if ("Pending".equals(filter)) {
+                todos = tdao.getPendingTodos();
+            } else {
+                todos = tdao.getAllTodos();
+            }
+            updateTable(todos);
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error filtering todos: " + e.getMessage());
         }
     }
 

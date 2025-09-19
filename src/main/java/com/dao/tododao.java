@@ -19,15 +19,7 @@ public class tododao {
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                todoapp t = new todoapp();
-                t.setId(rs.getInt("id"));
-                t.setTitle(rs.getString("title"));
-                t.setDescription(rs.getString("description"));
-                t.setCompleted(rs.getBoolean("completed"));
-                t.setCreated_at(rs.getTimestamp("created_at").toLocalDateTime());
-                t.setUpdated_at(rs.getTimestamp("updated_at").toLocalDateTime());
-
-                todoapps.add(t);
+                todoapps.add(mapRow(rs));
             }
         }
         return todoapps;
@@ -37,13 +29,12 @@ public class tododao {
     public void insertTodo(todoapp t) throws SQLException {
         String sql = "INSERT INTO todoapp (title, description, completed) VALUES (?, ?, ?)";
         try (Connection con = Database.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+             PreparedStatement stmt = con.prepareStatement(sql)) {
 
-            ps.setString(1, t.getTitle());
-            ps.setString(2, t.getDescription());
-            ps.setBoolean(3, t.isCompleted());
-
-            ps.executeUpdate();
+            stmt.setString(1, t.getTitle());
+            stmt.setString(2, t.getDescription());
+            stmt.setBoolean(3, t.isCompleted());
+            stmt.executeUpdate();
         }
     }
 
@@ -62,13 +53,64 @@ public class tododao {
     }
 
     // Delete a todo by ID
-    public void deleteTodo(int id) throws SQLException {
+    public boolean deleteTodo(int id) throws SQLException {
         String sql = "DELETE FROM todoapp WHERE id = ?";
         try (Connection con = Database.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setInt(1, id);
-            ps.executeUpdate();
+            int a=ps.executeUpdate();
+            return a>0;
         }
+    }
+
+    // ✅ Fetch only completed todos
+    public List<todoapp> getCompletedTodos() throws SQLException {
+        return getTodosByStatus(true);
+    }
+
+    // ✅ Fetch only pending todos
+    public List<todoapp> getPendingTodos() throws SQLException {
+        return getTodosByStatus(false);
+    }
+
+    // Helper method to avoid duplicate code
+    private List<todoapp> getTodosByStatus(boolean completed) throws SQLException {
+        List<todoapp> todoapps = new ArrayList<>();
+        String sql = "SELECT * FROM todoapp WHERE completed = ? ORDER BY created_at";
+
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setBoolean(1, completed);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    todoapps.add(mapRow(rs));
+                }
+            }
+        }
+        return todoapps;
+    }
+
+    // ✅ Small helper to map a ResultSet row into todoapp object
+    private todoapp mapRow(ResultSet rs) throws SQLException {
+        todoapp t = new todoapp();
+        t.setId(rs.getInt("id"));
+        t.setTitle(rs.getString("title"));
+        t.setDescription(rs.getString("description"));
+        t.setCompleted(rs.getBoolean("completed"));
+
+        Timestamp createdAt = rs.getTimestamp("created_at");
+        if (createdAt != null) {
+            t.setCreated_at(createdAt.toLocalDateTime());
+        }
+
+        Timestamp updatedAt = rs.getTimestamp("updated_at");
+        if (updatedAt != null) {
+            t.setUpdated_at(updatedAt.toLocalDateTime());
+        }
+
+        return t;
     }
 }
